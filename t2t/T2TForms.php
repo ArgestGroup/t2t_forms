@@ -1,16 +1,16 @@
 <?php
+
 	/**
 	 * @version 0.9
 	 * @author Sergey Shuruta
-	 * @copyright 2013 Argest Group
+	 * @copyright 2013 Argest Group 
 	 */
 	class T2TForms
 	{
-		
 		// Сервер форм заказа
-		const SERVER = 'http://v2-gui.stagging.t2t.in.ua';
+		const SERVER = 'http://v2gui.t2t.in.ua';
 		// Сервер оплаты
-		const INVOICE_SERVER = 'http://v2-invoice.stagging.t2t.in.ua';
+		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua';
 		// Платежная система по умолчанию
 		const PS_DEFAULT = 'ec_privat';
 		// Поезда
