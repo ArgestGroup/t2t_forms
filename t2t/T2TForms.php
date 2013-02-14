@@ -1,7 +1,7 @@
 <?php
 
 	/**
-	 * @version 0.9
+	 * @version 0.91
 	 * @author Sergey Shuruta
 	 * @copyright 2013 Argest Group 
 	 */
