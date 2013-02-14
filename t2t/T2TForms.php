@@ -9,7 +9,7 @@
 	{
 		const SERVER = 'http://v2gui.t2t.in.ua'; // Сервер форм заказа
 		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua'; // Сервер оплаты
-		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css';
+		
 		const T2T_JQUERY_UI_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/jquery-ui.css';
 		const PS_DEFAULT = 'ec_privat'; // Платежная система по умолчанию
 		const TRAIN = 'train'; // Поезда
@@ -52,7 +52,7 @@
 		
 		private function __construct()
 		{
-			if(!isset($_SESSION))session_start();
+			if(!isset($_SESSION)) session_start();
 			$_SESSION['t2t']['pay_type'] = self::PS_DEFAULT;
 		}
 
@@ -248,8 +248,11 @@
 		 */
 		public function setUEmail($email)
 		{
-			if(filter_var($email, FILTER_VALIDATE_EMAIL))
+			if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
 				$_SESSION['t2t']['uEmail'] = $email;
+				if(isset($_SESSION['t2t']['t2t_login'])) 
+					$_SESSION['t2t']['t2t_login'] = false;
+			}
 		}
 		
 		/**
@@ -410,6 +413,8 @@
 			$params['dst'] = (isset($_GET['dst']) && intval($_GET['dst']) == $_GET['dst']) ? $_GET['dst'] : '';
 			$params['dt']  = (isset($_GET['dt']) && date('Y-m-d', strtotime($_GET['dt'])) == $_GET['dt']) ? $_GET['dt'] : '';
 			$params['router'] = $this->router;
+			$params['inlineLogin'] = isset($_SESSION['t2t']['t2t_login']) ? $_SESSION['t2t']['t2t_login'] : false;
+			$params['isLogin'] = (isset($_SESSION['t2t']['uEmail']) && $_SESSION['t2t']['uEmail']) ? $_SESSION['t2t']['uEmail'] : false;
 			if($params['transport'] && $params['src'] && $params['dst'] && $params['dt'] && $params['router']) {
 				return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/table', $params);
 			}
@@ -420,17 +425,49 @@
 		 */
 		static function ajaxCatcher()
 		{
+			if(!isset($_SESSION)) session_start();
 			$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : '';
 			if(isset($_REQUEST['do'])) {
 				$router = '';
 				switch ($_REQUEST['do']) {
-					case 'autocomplete': $router = '/' . $lang . '/search/autocomplete';  break;
-					case 'tripinfo': 	 $router = '/' . $lang . '/get/tripinfo'; 		  break;
-					case 'loadmap':		 $router = '/' . $lang . '/get/carmap'; 		  break;
-					case 'getfio':		 $router = '/' . $lang . '/invoice/getFio'; 	  break;
-					case 'passitem':	 $router = '/invoice/passItem.ejs'; break;
-					case 'passitemBus':	 $router = '/invoice/passItemBus.ejs'; break;
+					case 'autocomplete': $router = '/' . $lang . '/search/autocomplete'; break;
+					case 'tripinfo':	  $router = '/' . $lang . '/get/tripinfo'; 		  break;
+					case 'loadmap':		  $router = '/' . $lang . '/get/carmap'; 		  break;
+					case 'getfio':		  $router = '/' . $lang . '/invoice/getFio'; 	  break;
+					case 'passitem':	  $router = '/invoice/passItem.ejs'; 			  break;
+					case 'passitemBus':	  $router = '/invoice/passItemBus.ejs';			  break;
+					case 'checkemail':   $router = '/' . $lang . '/get/checkemail'; break;
+					case 'tryreg':
+						$params = array();
+						$params['email'] = isset($_POST['email']) ? $_POST['email'] : '';
+						$params['email'] = filter_var($params['email'], FILTER_VALIDATE_EMAIL) ? $params['email'] : false;
+						$params['router'] = isset($_POST['router']) ? $_POST['router'] : '';
+						$captcha = isset($_POST['captcha']) ? $_POST['captcha'] : '';
+						$params['captcha'] = (isset($_SESSION['t2t']['captcha']) && strtolower($captcha) === strtolower($_SESSION['t2t']['captcha']));
+						$request = self::sendRequest(self::SERVER . '/' . $lang . '/get/reg', $params);
+						echo $request;
+						$request = json_decode($request);
+						if(isset($request->isAuth) && $request->isAuth) {
+							$_SESSION['t2t']['uEmail'] = $request->email;
+							$_SESSION['t2t']['t2t_login'] = true;
+						}
+					break;
+					case 'trylogin':
+						$params = array();
+						$params['email'] = isset($_POST['email']) ? $_POST['email'] : '';
+						$params['email'] = filter_var($params['email'], FILTER_VALIDATE_EMAIL) ? $params['email'] : '';
+						$params['router'] = isset($_POST['router']) ? $_POST['router'] : '';
+						$params['passw'] = isset($_POST['passw']) ? $_POST['passw'] : '';
+						$request = self::sendRequest(self::SERVER . '/' . $lang . '/get/login', $params);
+						echo $request;
+						$request = json_decode($request);
+						if(isset($request->isAuth) && $request->isAuth) {
+							$_SESSION['t2t']['uEmail'] = $params['email'];
+							$_SESSION['t2t']['t2t_login'] = true;
+						}
+					break;
 				}
+
 				if($router)
 					echo self::sendRequest(self::SERVER . $router, $_REQUEST);
 			}
@@ -468,7 +505,7 @@
 		/**
 		 * Обработка заказа билета(ов)
 		 */
-		static function buyRouter()
+		static public function buyRouter()
 		{
 			if(!isset($_SESSION)) session_start();
 			if(isset($_POST['transport_type'])) {
@@ -511,7 +548,7 @@
 		/**
 		 * Обработка перенаправления на инвойс (из истории)
 		 */
-		static function invoiceRouter()
+		static public function invoiceRouter()
 		{
 			if(!isset($_SESSION))session_start();
 			$ivId = isset($_GET['ivId']) ? $_GET['ivId'] : 0;
@@ -519,14 +556,61 @@
 			if($ivId && self::getUEmail()) {
 				$url = self::INVOICE_SERVER . '/' . $lang . '/invoice/index/' . $ivId;
 				$params = array();
-				$params['host']  = self::getDomain();
+				$params['domain']  = self::getDomain();
 				$params['email']  = self::getUEmail();
 				$params['toBack'] = base64_encode($_SERVER['HTTP_REFERER']);
 				$params['hashCode'] = self::genHashCode($url);
 				header('Location: ' . $url . '?' . http_build_query($params));
 			}
 		}
+
+		static public function getCaptcha()
+		{
+			if(!isset($_GET['captcha']))  return;
+			
+			if(!isset($_SESSION)) session_start();
+			$letters = 'ABCDEFGKIJKLMNOPQRSTUVWXYZ';
+			 
+			  $caplen = 5;
+			  $width = 120;
+			  $height = 30;
+			  $font = 'captcha_font.ttf';
+			  $fontsize = 16;
+			  header('Content-type: image/png');
+			 
+			  $im = imagecreatetruecolor($width, $height);
+			  imagesavealpha($im, true);
+			  $bg = imagecolorallocatealpha($im, 0, 0, 0, 127);
+			  imagefill($im, 0, 0, $bg);
+			 
+			  putenv( 'GDFONTPATH=' . realpath('.') . '/' );
+
+			  $captcha = '';
+			  for ($i = 0; $i < $caplen; $i++)
+			  {
+			    $captcha .= $letters[ rand(0, strlen($letters)-1) ];
+			    $x = ($width - 20) / $caplen * $i + 10;
+			    $x = rand($x, $x+4);
+			    $y = $height - ( ($height - $fontsize) / 2 );
+			    $curcolor = imagecolorallocate( $im, rand(0, 100), rand(0, 100), rand(0, 100) );
+			    $angle = rand(-25, 25);
+			    imagettftext($im, $fontsize, $angle, $x, $y, $curcolor, $font, $captcha[$i]);
+			  }
+			  
+			  $_SESSION['t2t']['captcha'] = $captcha;
+			 
+			  imagepng($im);
+			  imagedestroy($im);
+		}
 		
+		static public function logout()
+		{
+			if(!isset($_SESSION)) session_start();
+			if(isset($_GET['t2t_logout'])) {
+				$_SESSION['t2t'] = array();
+				header('Location: ' . $_SERVER['HTTP_REFERER']);
+			}
+		}
 	}
 
 ?>
