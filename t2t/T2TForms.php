@@ -9,11 +9,12 @@
 	{
 		const SERVER = 'http://v2gui.t2t.in.ua'; // Сервер форм заказа
 		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua'; // Сервер оплаты
-		
-		const T2T_JQUERY_UI_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/jquery-ui.css';
+		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css'; // Стили css
+		const T2T_JQUERY_UI_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/jquery-ui.css'; // Стили css
 		const PS_DEFAULT = 'ec_privat'; // Платежная система по умолчанию
 		const TRAIN = 'train'; // Поезда
 		const BUS = 'bus'; // Автобусы
+		
 		// Локализация
 		const LANG_RU = 'ru';
 		const LANG_UA = 'ua';
