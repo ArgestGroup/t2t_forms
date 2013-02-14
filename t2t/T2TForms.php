@@ -1,7 +1,7 @@
 <?php
 
 	/**
-	 * @version 0.91
+	 * @version 0.92
 	 * @author Sergey Shuruta
 	 * @copyright 2013 Argest Group 
 	 */
@@ -9,8 +9,8 @@
 	{
 		const SERVER = 'http://v2gui.t2t.in.ua'; // Сервер форм заказа
 		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua'; // Сервер оплаты
-		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css';
-		const T2T_JQUERY_UI_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/jquery-ui.css';
+		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css'; // стили Css
+		const T2T_JQUERY_UI_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/jquery-ui.css'; // стили Css
 		const PS_DEFAULT = 'ec_privat'; // Платежная система по умолчанию
 		const TRAIN = 'train'; // Поезда
 		const BUS = 'bus'; // Автобусы
@@ -144,10 +144,27 @@
 			}
 		}
 		
+		/**
+		 * Устанавливает метку подключать ли jQuery автоматически
+		 * @param boolean $isAdd
+		 * @return boolean
+		 */
 		public function isAddJQuery($isAdd = null)
 		{
 			if(isset($isAdd)) $this->addJQuery = $isAdd;
 			return $this->addJQuery;
+		}
+		
+		/**
+		 * Устанавливает метку отображения формы 
+		 * запроса на странице результатов поиска.
+		 * @param boolean $isAdd
+		 * @return boolean
+		 */
+		public function isFormOnSearch($isAdd = null)
+		{
+			if(isset($isAdd)) $this->addFormOnSearch = $isAdd;
+			return $this->addFormOnSearch;
 		}
 
 		/**
@@ -404,10 +421,11 @@
 		/**
 		 * Отображает таблицу с результатами поиска
 		 */
-		public function getTable($vsSearchBox = false)
+		public function getTable($vsSearchBox = null)
 		{
+			$addFormOnSearch = isset($vsSearchBox) ? $vsSearchBox : $this->addFormOnSearch;
 			$params = array();
-			$params['vs_search_box'] = $vsSearchBox;
+			$params['vs_search_box'] = $addFormOnSearch;
 			$params['transport'] = (isset($_GET['transport']) && ($_GET['transport'] == self::TRAIN || $_GET['transport'] == self::BUS)) ? $_GET['transport'] : '';
 			$params['src'] = (isset($_GET['src']) && intval($_GET['src']) == $_GET['src']) ? $_GET['src'] : '';
 			$params['dst'] = (isset($_GET['dst']) && intval($_GET['dst']) == $_GET['dst']) ? $_GET['dst'] : '';
@@ -415,6 +433,14 @@
 			$params['router'] = $this->router;
 			$params['inlineLogin'] = isset($_SESSION['t2t']['t2t_login']) ? $_SESSION['t2t']['t2t_login'] : false;
 			$params['isLogin'] = (isset($_SESSION['t2t']['uEmail']) && $_SESSION['t2t']['uEmail']) ? $_SESSION['t2t']['uEmail'] : false;
+			$params_ = array();
+			parse_str($_SERVER['QUERY_STRING'], $params_);
+			$params['params'] = array();
+			foreach ($params_ as $key => $value) {
+				if(!isset($params[$key])) {
+					$params['params'][$key] = $value;
+				}
+			}
 			if($params['transport'] && $params['src'] && $params['dst'] && $params['dt'] && $params['router']) {
 				return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/table', $params);
 			}
