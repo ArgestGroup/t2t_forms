@@ -11,11 +11,9 @@
 		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua'; // Сервер оплаты
 		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css'; // стили Css
 		const T2T_JQUERY_UI_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/jquery-ui.css'; // стили Css
-		
 		const PS_DEFAULT = 'ec_privat'; // Платежная система по умолчанию
 		const TRAIN = 'train'; // Поезда
 		const BUS = 'bus'; // Автобусы
-
 		// Локализация
 		const LANG_RU = 'ru';
 		const LANG_UA = 'ua';
@@ -29,7 +27,6 @@
 				'forms' => self::T2T_FORMS_STYLE,
 				'jquery_ui' => self::T2T_JQUERY_UI_STYLE,
 			);
-		// Добавлять ли jQuery
 		private $addJQuery = true;
 		// Каталог в котором находится класс T2TForms
 		private $router = '';
@@ -39,7 +36,6 @@
 		private $lang = self::LANG_RU;
 		// Показывать ошибки
 		public static $isShowErrors = true;
-		// отображать форму поиска на странице результатов
 		private $addFormOnSearch = true;
 
 		protected static $_instance;
