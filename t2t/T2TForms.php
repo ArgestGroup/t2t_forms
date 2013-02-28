@@ -7,6 +7,7 @@
 	 */
 	class T2TForms
 	{
+
 		const SERVER = 'http://v2gui.t2t.in.ua'; // Сервер форм заказа
 		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua'; // Сервер оплаты
 		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css'; // стили Css
@@ -370,7 +371,7 @@
 			$params['form_url'] = base64_encode(substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?')));
 			$params['pay_type'] = $_SESSION['t2t']['pay_type'];
 			$params['transport'] = $transport;
-			return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/paysystems', $params);
+			return self::sendRequest(self::SERVER  . '/' . self::getlang() . '/get/paysystems', $params);
 		}
 		
 		/**
@@ -416,7 +417,7 @@
 			$params['action'] = base64_encode($this->action);
 			$params['type']   = $this->type;
 			$params['router']   = $this->router;
-			return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/form', $params);
+			return self::sendRequest(self::SERVER  . '/' . self::getlang() . '/get/form', $params);
 		}
 		
 		/**
@@ -443,7 +444,7 @@
 				}
 			}
 			if($params['transport'] && $params['src'] && $params['dst'] && $params['dt'] && $params['router']) {
-				return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/table', $params);
+				return self::sendRequest(self::SERVER  . '/' . self::getlang() . '/get/table', $params);
 			}
 		}
 		
