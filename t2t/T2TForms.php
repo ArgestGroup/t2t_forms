@@ -7,6 +7,7 @@
 	 */
 	class T2TForms
 	{
+
 		const SERVER = 'http://v2gui.t2t.in.ua'; // Сервер форм заказа
 		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua'; // Сервер оплаты
 		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css'; // стили Css
@@ -57,7 +58,7 @@
 			$_SESSION['t2t']['pay_type'] = self::PS_DEFAULT;
 		}
 
-		private function log($mess)
+		private static function log($mess)
 		{
 			if(self::$isShowErrors)
 				echo '<span style="padding: 2px 5px;color:#fff;background: #ff4500;font-weight:bold;"><u>' . __CLASS__ . '</u>: ' . $mess . '.</span>';
@@ -141,7 +142,7 @@
 			if(in_array($lang, array('ru','ua','en','de'))) {
 				$this->lang = $lang;
 			} else {
-				$this->log('invalid language "' . $lang . '"');
+				self::log('invalid language "' . $lang . '"');
 			}
 		}
 		
@@ -385,7 +386,7 @@
 			$date_b = isset($_GET['date_b']) ? $_GET['date_b'] : date("d.m.Y");
 		
 			if(!$email) {
-				$this->log('Not authorization user');
+				self::log('Not authorization user');
 				return;
 			}
 			$params = array();
@@ -463,7 +464,7 @@
 					case 'getfio':		  $router = '/' . $lang . '/invoice/getFio'; 	  break;
 					case 'passitem':	  $router = '/invoice/passItem.ejs'; 			  break;
 					case 'passitemBus':	  $router = '/invoice/passItemBus.ejs';			  break;
-					case 'checkemail':   $router = '/' . $lang . '/get/checkemail'; break;
+					case 'checkemail':   $router = '/' . $lang . '/get/checkemail';		  break;
 					case 'tryreg':
 						$params = array();
 						$params['email'] = isset($_POST['email']) ? $_POST['email'] : '';
@@ -631,10 +632,10 @@
 			  imagedestroy($im);
 		}
 		
-		static public function logout()
+		static public function logout($logaut = false)
 		{
 			if(!isset($_SESSION)) session_start();
-			if(isset($_GET['t2t_logout'])) {
+			if(isset($_GET['t2t_logout']) || $logaut) {
 				$_SESSION['t2t'] = array();
 				header('Location: ' . $_SERVER['HTTP_REFERER']);
 			}
