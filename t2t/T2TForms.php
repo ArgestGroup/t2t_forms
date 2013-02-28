@@ -334,7 +334,7 @@
 			if(!is_array($params)) return;
 
 			$params['hashCode'] = self::genHashCode($url);
-			$params['domain'] = self::getDomain();
+			$params['domain'] = base64_encode(self::getDomain());
 			$url = $url . ($params ? ('?' . http_build_query($params)) : '');
 
 			if( $curl = curl_init() ) {
@@ -468,6 +468,7 @@
 						$params = array();
 						$params['email'] = isset($_POST['email']) ? $_POST['email'] : '';
 						$params['email'] = filter_var($params['email'], FILTER_VALIDATE_EMAIL) ? $params['email'] : false;
+						$params['email'] = base64_encode($params['email']);
 						$params['router'] = isset($_POST['router']) ? $_POST['router'] : '';
 						$captcha = isset($_POST['captcha']) ? $_POST['captcha'] : '';
 						$params['captcha'] = (isset($_SESSION['t2t']['captcha']) && strtolower($captcha) === strtolower($_SESSION['t2t']['captcha']));
