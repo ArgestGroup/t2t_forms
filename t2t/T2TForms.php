@@ -174,7 +174,7 @@
 		 * По умолчанию ru
 		 * @param string $lang
 		 */
-		public function getLang()
+		public static function getLang()
 		{
 			return $this->lang;
 		}
