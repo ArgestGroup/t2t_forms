@@ -174,7 +174,7 @@
 		 * По умолчанию ru
 		 * @param string $lang
 		 */
-		public static function getLang()
+		public function getLang()
 		{
 			return $this->lang;
 		}
@@ -371,7 +371,7 @@
 			$params['form_url'] = base64_encode(substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?')));
 			$params['pay_type'] = $_SESSION['t2t']['pay_type'];
 			$params['transport'] = $transport;
-			return self::sendRequest(self::SERVER  . '/' . self::getlang() . '/get/paysystems', $params);
+			return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/paysystems', $params);
 		}
 		
 		/**
@@ -381,7 +381,7 @@
 		{
 				
 			$email = self::getUEmail();
-			$lang = self::getLang();
+			$lang = $this->getlang();
 			$date_a = isset($_GET['date_a']) ? $_GET['date_a'] : date("d.m.Y");
 			$date_b = isset($_GET['date_b']) ? $_GET['date_b'] : date("d.m.Y");
 		
@@ -417,7 +417,7 @@
 			$params['action'] = base64_encode($this->action);
 			$params['type']   = $this->type;
 			$params['router']   = $this->router;
-			return self::sendRequest(self::SERVER  . '/' . self::getlang() . '/get/form', $params);
+			return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/form', $params);
 		}
 		
 		/**
@@ -444,7 +444,7 @@
 				}
 			}
 			if($params['transport'] && $params['src'] && $params['dst'] && $params['dt'] && $params['router']) {
-				return self::sendRequest(self::SERVER  . '/' . self::getlang() . '/get/table', $params);
+				return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/table', $params);
 			}
 		}
 		
