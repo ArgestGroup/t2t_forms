@@ -1,9 +1,9 @@
 <?php
 
 	/**
-	 * @version 0.93
+	 * @version 0.92
 	 * @author Sergey Shuruta
-	 * @copyright 2013 Argest Group 
+	 * @copyright Copyright 2013 Argest Group LLC (email: info@argest.com.ua)
 	 */
 	class T2TForms
 	{
@@ -327,7 +327,7 @@
 		 */
 		public function getJs()
 		{
-			return self::sendRequest(self::SERVER . '/' . $this->getlang() . '/get/js', array('addJQuery' => $this->addJQuery));
+			return self::sendRequest(self::SERVER . '/get/js', array('addJQuery' => $this->addJQuery));
 		}
 		
 		private static function sendRequest($url, $params = array())
@@ -455,18 +455,10 @@
 		{
 			if(!isset($_SESSION)) session_start();
 			$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : '';
-			
-			$params = $_REQUEST;
-			
 			if(isset($_REQUEST['do'])) {
 				$router = '';
 				switch ($_REQUEST['do']) {
-					case 'autocomplete':
-						$router = '/' . $lang . '/search/autocomplete';
-						$langIds = array('en' => 1,'ru' => 2,'ua' => 3,'de' => 4);
-						if(isset($langIds[$lang]))
-							$params['langId'] = $langIds[$lang];
-					break;
+					case 'autocomplete': $router = '/' . $lang . '/search/autocomplete'; break;
 					case 'tripinfo':	  $router = '/' . $lang . '/get/tripinfo'; 		  break;
 					case 'loadmap':		  $router = '/' . $lang . '/get/carmap'; 		  break;
 					case 'getfio':		  $router = '/' . $lang . '/invoice/getFio'; 	  break;
@@ -482,6 +474,7 @@
 						$captcha = isset($_POST['captcha']) ? $_POST['captcha'] : '';
 						$params['captcha'] = (isset($_SESSION['t2t']['captcha']) && strtolower($captcha) === strtolower($_SESSION['t2t']['captcha']));
 						$request = self::sendRequest(self::SERVER . '/' . $lang . '/get/reg', $params);
+						echo $request;
 						$request = json_decode($request);
 						if(isset($request->isAuth) && $request->isAuth) {
 							$_SESSION['t2t']['uEmail'] = $request->email;
@@ -535,7 +528,7 @@
 		 */
 		public function getJsLinks()
 		{
-			return json_decode(self::sendRequest(self::SERVER . '/' . $this->getLang() . '/get/js', array('addJQuery' => $this->addJQuery, 'in_json' => true)));
+			return json_decode(self::sendRequest(self::SERVER . '/get/js', array('addJQuery' => $this->addJQuery, 'in_json' => true)));
 		}
 		
 		/**
