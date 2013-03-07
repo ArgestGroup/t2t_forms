@@ -1,7 +1,7 @@
 <?php
 
 	/**
-	 * @version 0.931
+	 * @version 0.932
 	 * @author Sergey Shuruta
 	 * @copyright Copyright 2013 Argest Group LLC (email: info@argest.com.ua)
 	 */
