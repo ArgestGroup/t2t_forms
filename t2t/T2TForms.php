@@ -26,8 +26,8 @@ class T2TForms {
 	public static $isShowErrors = true;
 	private $addFormOnSearch = true;
 
-	private static $INVOICE_SERVER = 'http://v2invoice-stagging.t2t.in.ua';
-	private static $SERVER = 'http://v2gui-stagging.t2t.in.ua';
+	private static $INVOICE_SERVER = 'http://v2invoice.t2t.in.ua';
+	private static $SERVER = 'http://v2gui.t2t.in.ua';
 
 	// Адрес страницы результатов поиска
 	private $action = '#';
@@ -54,7 +54,7 @@ class T2TForms {
 
 		$_SESSION['t2t']['pay_type'] = self::PS_DEFAULT;
 
-		$T2T_FORMS_STYLE = self::$SERVER . '/themes/forms/css/t2t.css'; // стили Css
+		$T2T_FORMS_STYLE = self::$SERVER . '/themes/forms/css/t2t.css?v=1'; // стили Css
 		$T2T_JQUERY_UI_STYLE = self::$SERVER . '/themes/forms/css/jquery-ui.css'; // стили Css
 
 		// Стили оформления
