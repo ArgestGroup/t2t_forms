@@ -2,16 +2,14 @@
 
 	/**
 	 * @version 0.933
-	 	 * @author Sergey Shuruta
+	 * @author Sergey Shuruta
 	 * @copyright Copyright 2013 Argest Group LLC (email: info@argest.com.ua)
 	 */
 	class T2TForms
 	{
+		const MODE = 'production';
 
-		const SERVER = 'http://v2gui.t2t.in.ua'; // Сервер форм заказа
-		const INVOICE_SERVER = 'http://v2invoice.t2t.in.ua'; // Сервер оплаты
-		const T2T_FORMS_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/t2t.css'; // стили Css
-		const T2T_JQUERY_UI_STYLE = 'http://v2gui.t2t.in.ua/themes/forms/css/jquery-ui.css'; // стили Css
+		
 		const PS_DEFAULT = 'ec_privat'; // Платежная система по умолчанию
 		const TRAIN = 'train'; // Поезда
 		const BUS = 'bus'; // Автобусы
@@ -21,13 +19,6 @@
 		const LANG_EN = 'en';
 		const LANG_DE = 'de';
 
-		// Адрес страницы результатов поиска
-		private $action = '#';
-		// Стили оформления
-		private $t2t_styles = array(
-				'forms' => self::T2T_FORMS_STYLE,
-				'jquery_ui' => self::T2T_JQUERY_UI_STYLE,
-			);
 		private $addJQuery = true;
 		// Каталог в котором находится класс T2TForms
 		private $router = '';
@@ -38,6 +29,15 @@
 		// Показывать ошибки
 		public static $isShowErrors = true;
 		private $addFormOnSearch = true;
+
+		private static $INVOICE_SERVER = '';
+		private static $SERVER = '';
+
+		// Адрес страницы результатов поиска
+		private $action = '#';
+		
+		// Стили оформления
+		private static $t2t_styles = array();
 
 		protected static $_instance;
 
@@ -52,10 +52,28 @@
 			
 		}
 		
+		
 		private function __construct()
 		{
 			if(!isset($_SESSION)) session_start();
+			
 			$_SESSION['t2t']['pay_type'] = self::PS_DEFAULT;
+			
+			$INVOICE_DOMAINS=array('production'=>'v2invoice.t2t.in.ua');
+			$FORMS_DOMAINS  =array('production'=>'v2gui.t2t.in.ua'    ); 
+			
+			self::$INVOICE_SERVER = 'http://' . $INVOICE_DOMAINS[self::MODE]; // Сервер оплаты
+			self::$SERVER = 'http://' . $FORMS_DOMAINS[self::MODE]; // Сервер оплаты
+
+			$T2T_FORMS_STYLE = 'http://' . $FORMS_DOMAINS[self::MODE] . '/themes/forms/css/t2t.css'; // стили Css
+			$T2T_JQUERY_UI_STYLE = 'http://'. $FORMS_DOMAINS[self::MODE] .'/themes/forms/css/jquery-ui.css'; // стили Css
+
+			// Стили оформления
+			
+			self::$t2t_styles = array(
+					'forms' => $T2T_FORMS_STYLE,
+					'jquery_ui' => $T2T_JQUERY_UI_STYLE,
+				);
 		}
 
 		private static function log($mess)
@@ -63,6 +81,7 @@
 			if(self::$isShowErrors)
 				echo '<span style="padding: 2px 5px;color:#fff;background: #ff4500;font-weight:bold;"><u>' . __CLASS__ . '</u>: ' . $mess . '.</span>';
 		}
+		
 		
 		public static function isShowEr($show = true)
 		{
@@ -327,13 +346,12 @@
 		 */
 		public function getJs()
 		{
-			return self::sendRequest(self::SERVER . '/get/js', array('addJQuery' => $this->addJQuery));
+			return self::sendRequest(self::$SERVER . '/get/js', array('addJQuery' => $this->addJQuery));
 		}
 		
 		private static function sendRequest($url, $params = array())
 		{
 			if(!is_array($params)) return;
-
 			$params['hashCode'] = self::genHashCode($url);
 			$params['domain'] = base64_encode(self::getDomain());
 			$url = $url . ($params ? ('?' . http_build_query($params)) : '');
@@ -371,7 +389,7 @@
 			$params['form_url'] = base64_encode(substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?')));
 			$params['pay_type'] = $_SESSION['t2t']['pay_type'];
 			$params['transport'] = $transport;
-			return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/paysystems', $params);
+			return self::sendRequest(self::$SERVER  . '/' . $this->getlang() . '/get/paysystems', $params);
 		}
 		
 		/**
@@ -386,7 +404,7 @@
 			$date_b = isset($_GET['date_b']) ? $_GET['date_b'] : date("d.m.Y");
 		
 			if(!$email) {
-				self::log('Not authorization user');
+				self::log('Not authorized user');
 				return;
 			}
 			$params = array();
@@ -395,7 +413,7 @@
 			$params['date_b'] = $date_b;
 			$params['router'] = $this->router;
 			$params['params'] = base64_encode($_SERVER['QUERY_STRING']);
-			return self::sendRequest(self::SERVER . '/' . $lang . '/get/archive', $params);
+			return self::sendRequest(self::$SERVER . '/' . $lang . '/get/archive', $params);
 		}
 		
 		/**
@@ -417,7 +435,7 @@
 			$params['action'] = base64_encode($this->action);
 			$params['type']   = $this->type;
 			$params['router']   = $this->router;
-			return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/form', $params);
+			return self::sendRequest(self::$SERVER  . '/' . $this->getlang() . '/get/form', $params);
 		}
 		
 		/**
@@ -444,7 +462,7 @@
 				}
 			}
 			if($params['transport'] && $params['src'] && $params['dst'] && $params['dt'] && $params['router']) {
-				return self::sendRequest(self::SERVER  . '/' . $this->getlang() . '/get/table', $params);
+				return self::sendRequest(self::$SERVER  . '/' . $this->getlang() . '/get/table', $params);
 			}
 		}
 		
@@ -473,7 +491,7 @@
 						$params['router'] = isset($_POST['router']) ? $_POST['router'] : '';
 						$captcha = isset($_POST['captcha']) ? $_POST['captcha'] : '';
 						$params['captcha'] = (isset($_SESSION['t2t']['captcha']) && strtolower($captcha) === strtolower($_SESSION['t2t']['captcha']));
-						$request = self::sendRequest(self::SERVER . '/' . $lang . '/get/reg', $params);
+						$request = self::sendRequest(self::$SERVER . '/' . $lang . '/get/reg', $params);
 						echo $request;
 						$request = json_decode($request);
 						if(isset($request->isAuth) && $request->isAuth) {
@@ -487,7 +505,7 @@
 						$params['email'] = filter_var($params['email'], FILTER_VALIDATE_EMAIL) ? $params['email'] : '';
 						$params['router'] = isset($_POST['router']) ? $_POST['router'] : '';
 						$params['passw'] = isset($_POST['passw']) ? $_POST['passw'] : '';
-						$request = self::sendRequest(self::SERVER . '/' . $lang . '/get/login', $params);
+						$request = self::sendRequest(self::$SERVER . '/' . $lang . '/get/login', $params);
 						echo $request;
 						$request = json_decode($request);
 						if(isset($request->isAuth) && $request->isAuth) {
@@ -498,7 +516,7 @@
 				}
 
 				if($router)
-					echo self::sendRequest(self::SERVER . $router, $_REQUEST);
+					echo self::sendRequest(self::$SERVER . $router, $_REQUEST);
 			}
 		}
 		
@@ -512,9 +530,13 @@
 		 */
 		public function getCssLinks()
 		{
-			$styles = json_decode(self::sendRequest(self::SERVER . '/get/css'));
-			foreach ($this->t2t_styles as $style)
+			$styles = json_decode(self::sendRequest(self::$SERVER . '/get/css'));
+			
+			$stl=isset($this->t2t_styles)?$this->t2t_styles:self::$t2t_styles;
+			
+			foreach ($stl as $style)
 				$styles[] = $style;
+				
 			return $styles;
 		}
 		
@@ -528,7 +550,7 @@
 		 */
 		public function getJsLinks()
 		{
-			return json_decode(self::sendRequest(self::SERVER . '/get/js', array('addJQuery' => $this->addJQuery, 'in_json' => true)));
+			return json_decode(self::sendRequest(self::$SERVER . '/get/js', array('addJQuery' => $this->addJQuery, 'in_json' => true)));
 		}
 		
 		/**
@@ -539,7 +561,7 @@
 			if(!isset($_SESSION)) session_start();
 			if(isset($_POST['transport_type'])) {
 				$lang = isset($_POST['sys_lang']) ? $_POST['sys_lang'] : self::LANG_RU;
-				$url = self::INVOICE_SERVER . '/' . $lang . '/invoice/index';
+				$url = self::$INVOICE_SERVER . '/' . $lang . '/invoice/index';
 
 				$params = array();
 				$params['domain']		  = self::getDomain();
@@ -583,7 +605,7 @@
 			$ivId = isset($_GET['ivId']) ? $_GET['ivId'] : 0;
 			$lang = isset($_GET['lang']) ? $_GET['lang'] : self::LANG_RU;
 			if($ivId && self::getUEmail()) {
-				$url = self::INVOICE_SERVER . '/' . $lang . '/invoice/index/' . $ivId;
+				$url = self::$INVOICE_SERVER . '/' . $lang . '/invoice/index/' . $ivId;
 				$params = array();
 				$params['domain']  = self::getDomain();
 				$params['email']  = self::getUEmail();
