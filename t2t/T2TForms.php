@@ -7,8 +7,6 @@
 	 */
 	class T2TForms
 	{
-		const MODE = 'production';
-
 		
 		const PS_DEFAULT = 'ec_privat'; // Платежная система по умолчанию
 		const TRAIN = 'train'; // Поезда
@@ -30,8 +28,8 @@
 		public static $isShowErrors = true;
 		private $addFormOnSearch = true;
 
-		private static $INVOICE_SERVER = '';
-		private static $SERVER = '';
+		private static $INVOICE_SERVER = 'http://v2invoice.t2t.in.ua';
+		private static $SERVER = 'http://v2gui.t2t.in.ua';
 
 		// Адрес страницы результатов поиска
 		private $action = '#';
@@ -58,15 +56,9 @@
 			if(!isset($_SESSION)) session_start();
 			
 			$_SESSION['t2t']['pay_type'] = self::PS_DEFAULT;
-			
-			$INVOICE_DOMAINS=array('production'=>'v2invoice.t2t.in.ua');
-			$FORMS_DOMAINS  =array('production'=>'v2gui.t2t.in.ua'    ); 
-			
-			self::$INVOICE_SERVER = 'http://' . $INVOICE_DOMAINS[self::MODE]; // Сервер оплаты
-			self::$SERVER = 'http://' . $FORMS_DOMAINS[self::MODE]; // Сервер оплаты
 
-			$T2T_FORMS_STYLE = 'http://' . $FORMS_DOMAINS[self::MODE] . '/themes/forms/css/t2t.css'; // стили Css
-			$T2T_JQUERY_UI_STYLE = 'http://'. $FORMS_DOMAINS[self::MODE] .'/themes/forms/css/jquery-ui.css'; // стили Css
+			$T2T_FORMS_STYLE = self::$SERVER . '/themes/forms/css/t2t.css'; // стили Css
+			$T2T_JQUERY_UI_STYLE = self::$SERVER .'/themes/forms/css/jquery-ui.css'; // стили Css
 
 			// Стили оформления
 			
@@ -601,7 +593,7 @@
 		 */
 		static public function invoiceRouter()
 		{
-			if(!isset($_SESSION))session_start();
+			if(!isset($_SESSION)) session_start();
 			$ivId = isset($_GET['ivId']) ? $_GET['ivId'] : 0;
 			$lang = isset($_GET['lang']) ? $_GET['lang'] : self::LANG_RU;
 			if($ivId && self::getUEmail()) {
