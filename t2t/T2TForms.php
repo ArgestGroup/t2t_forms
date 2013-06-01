@@ -26,7 +26,7 @@ class T2TForms {
 	public static $isShowErrors = true;
 	private $addFormOnSearch = true;
 
-	private static $INVOICE_SERVER = 'http://v2invoice.t2t.in.ua';
+	private static $INVOICE_SERVER = 'https://v2invoice.t2t.in.ua';
 	private static $SERVER = 'http://v2gui.t2t.in.ua';
 
 	// Адрес страницы результатов поиска
