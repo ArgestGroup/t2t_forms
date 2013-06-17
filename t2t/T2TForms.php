@@ -585,6 +585,9 @@ class T2TForms {
 				$params['carId'] = $_POST['carId'];
 			if (isset ($_POST['sys_place']))
 				$params['sys_place'] = $_POST['sys_place'];
+			if (isset ($_POST['order_type']))
+				$params['order_type'] = $_POST['order_type'];
+				
 			$params['toBack'] = base64_encode($_SERVER['HTTP_REFERER']);
 			$params['hashCode'] = self::genHashCode($url);
 			header('Location: ' . $url . '?' . http_build_query($params));
